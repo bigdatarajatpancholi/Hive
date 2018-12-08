@@ -1,0 +1,22 @@
+DROP TABLE IF EXISTS kaushal.kothari;
+        CREATE EXTERNAL TABLE kaushal.kothari (calendar_date_nbr,language_cd,calendar_dt,calendar_day_short_desc,calendar_day_medium_desc,calendar_day_long_desc,calendar_day_in_month_nbr,calendar_day_in_quarter_nbr,calendar_day_in_year_nbr,calendar_day_weekend_fg,calendar_day_sequence_nbr,calendar_month_nbr,calendar_month_short_desc,calendar_month_medium_desc,calendar_month_long_desc,calendar_month_in_quarter_nbr,calendar_month_in_year_nbr,calendar_month_day_qty,calendar_month_begin_dt,calendar_month_end_dt,calendar_month_sequence_nbr,calendar_quarter_nbr,calendar_quarter_nm,calendar_quarter_short_desc,calendar_quarter_medium_desc,calendar_quarter_long_desc,calendar_quarter_in_year_nbr,calendar_quarter_day_qty,calendar_quarter_begin_dt,calendar_quarter_end_dt,calendar_quarter_sequence_nbr,calendar_year_nbr,calendar_year_nm,calendar_year_short_desc,calendar_year_medium_desc,calendar_year_long_desc,calendar_year_day_qty,calendar_year_month_nbr,calendar_year_quarter_nbr,calendar_year_begin_dt,calendar_year_end_dt,calendar_year_leap_year_fg,calendar_year_sequence_nbr)
+        ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY ','
+        STORED AS TEXTFILE
+        LOCATION '/user/bigdatarajatpancholi1035/ashish'
+		
+		DROP TABLE IF EXISTS kaushal.kothari;
+		
+		CREATE EXTERNAL TABLE kaushal.kothari (registration_dttm timestamp,id int,first_name string,last_name string,email string,gender string,ip_address string,cc string,country string,birthdate string,salary double,title string,comments string)
+        ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY ','
+        STORED AS TEXTFILE
+        LOCATION '/user/bigdatarajatpancholi1035/txt_out';
+		
+		INSERT INTO TABLE kaushal.kothari SELECT * FROM kaushal.kothari_parquet;
+		
+		CREATE EXTERNAL TABLE kaushal.kothari_parquet (registration_dttm timestamp,id int,first_name string,last_name string,email string,gender string,ip_address string,cc string,country string,birthdate string,salary double,title string,comments string)
+        ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY ','
+        STORED AS PARQUET
+        LOCATION '/user/bigdatarajatpancholi1035/parquet_out';

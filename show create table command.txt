@@ -1,0 +1,26 @@
+CREATE EXTERNAL TABLE `kaushal.kothari_parquet`(
+  `registration_dttm` timestamp, 
+  `id` int, 
+  `first_name` string, 
+  `last_name` string, 
+  `email` string, 
+  `gender` string, 
+  `ip_address` string, 
+  `cc` string, 
+  `country` string, 
+  `birthdate` string, 
+  `salary` double, 
+  `title` string, 
+  `comments` string)
+ROW FORMAT DELIMITED 
+  FIELDS TERMINATED BY ',' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
+LOCATION
+  'hdfs://ip-172-31-35-141.ec2.internal:8020/user/bigdatarajatpancholi1035/parquet_out'
+TBLPROPERTIES (
+  'numFiles'='1', 
+  'totalSize'='113629', 
+  'transient_lastDdlTime'='1544250620')

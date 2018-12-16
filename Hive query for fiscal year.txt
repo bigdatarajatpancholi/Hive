@@ -1,0 +1,19 @@
+
+
+
+select date_add(next_day('2018-01-31','SUN'),42*7)AS START_DATE, date_add(next_day('2018-01-31','SUN'),42*7+6) AS END_DATE from abc;
+
+
+select int(regexp_extract(KROGER_DESC,'\\((.*)\\)$'))+4 from fiscal_year;
+
+select substr(KROGER_DESC,1,4) as year, regexp_extract(KROGER_DESC,'\\((.*)\\)$') as period from fiscal_year;
+
+
+select date_add(next_day('substr(KROGER_DESC,1,4)-01-31','SUN'),int(regexp_extract(KROGER_DESC,'\\((.*)\\)$')*7)) AS START_DATE, date_add(next_day('substr(KROGER_DESC,1,4)-01-31','SUN'),int(regexp_extract(KROGER_DESC,'\\((.*)\\)$')*7+6)) AS END_DATE from fiscal_year;
+
+
+with result as (select substr(KROGER_DESC,1,4) as year, regexp_extract(KROGER_DESC,'\\((.*)\\)$') as period from fiscal_year)
+
+
+select date_add(next_day(concat(substr(a,1,4),'-01-31'),'SUN'),(cast(regexp_extract(a,'\\((.*)\\)$') as Int)-1)*7)AS START_DATE, 
+date_add(next_day(concat(substr(a,1,4),'-01-31'),'SUN'),(cast(regexp_extract(a,'\\((.*)\\)$') as Int)-1)*7+6) AS END_DATE from abc;

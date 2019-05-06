@@ -1,0 +1,48 @@
+--Remove Duplicates from below table:
+Table
+-------
+Sample
+-----------
+Name,Age
+---------
+Ravi,30
+Mani,20
+Ravi,30
+Ravi,30
+Mani,20
+Ravi,30
+Giri,50
+Giri,50
+Giri,50
+
+Create table sample(name string,age int)
+row format delimited
+fields terminated by ',';
+
+load data local inpath 'Sample' into table sample;
+
+Approach1:: 
+select name,age from sample group by name,age;
+
+Approach2:
+select distinct name,age from sample;
+
+Approach3:(--MOST IMPORTANT)
+Case:Remove duplicates from a table having very large number of columns:
+
+describe extended sample; --> It will give the information like data file location and also the type of delimiter used in the table
+
+hadoop fs -ls /user/data_file_location
+
+hadoop fs -cat /user/data_file_location/data_file
+
+create temporary table dummy(line string);
+
+load data inpath 'user/data_file_location/' into table dummy; --> This will move(NOT COPY) the data from given HDFS location to the location where the dummy table is created.
+
+insert overwrite table dummy
+select distinct(line) from dummy;
+
+select * from dummy;
+
+load data inpath 'user/dummy_data_file_location/' into table sample;

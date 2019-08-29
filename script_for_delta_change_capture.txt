@@ -1,0 +1,66 @@
+/* id, first_name, last_name is the primary key
+In DataBricks:-
+history_file_path - /FileStore/tables/src.csv
+delta_file_path - /FileStore/tables/del.csv
+*/
+
+import org.apache.spark.sql.functions._
+
+val hist_df = spark
+.read
+.format("csv")
+.option("header","true")
+.option("inferSchema","true")
+.load("/FileStore/tables/src.csv")
+
+val del_df = spark
+.read
+.format("csv")
+.option("header","true")
+.option("inferSchema","true")
+.load("/FileStore/tables/del.csv")
+
+val history_df = hist_df.select($"id", $"first_name", $"last_name", $"email", $"gender", $"ip_address", $"date")
+val delta_df = del_df.select($"id", $"first_name", $"last_name", $"email", $"gender", $"ip_address", $"date")
+
+history_df.printSchema()
+history_df.show()
+delta_df.printSchema()
+delta_df.show()
+
+val history_md5_df = history_df
+    .withColumn("history_non_key_concat",concat_ws("_",$"email",$"gender",$"ip_address",$"date"))
+    .withColumn("history_non_key_md5", sha2($"history_non_key_concat",256))
+    .drop("history_non_key_concat")
+
+history_md5_df.printSchema()
+history_md5_df.show(false)
+
+val delta_md5_df = del_df
+    .withColumn("delta_non_key_concat",concat_ws("_",$"email",$"gender",$"ip_address",$"date"))
+    .withColumn("delta_non_key_md5", sha2($"delta_non_key_concat",256))
+    .drop("delta_non_key_concat")
+
+delta_md5_df.printSchema()
+delta_md5_df.show(false)
+
+val incrementalLogicDF = history_md5_df.as("df1").join(delta_md5_df.as("df2"),$"df1.id" === $"df2.id", "full_outer")
+.withColumn("md5Flag",
+        //when(($"df1.id" === $"df2.id") && ($"delta_non_key_md5" === $"history_non_key_md5"), lit("NC"))
+        //.when($"df1.id".isNotNull && $"delta_non_key_md5".isNull, lit("D"))
+        when(($"df1.id" === $"df2.id") && ($"delta_non_key_md5" =!= $"history_non_key_md5"), lit("U"))
+        .when($"df1.id".isNull && $"delta_non_key_md5".isNotNull, lit("I")))
+      
+incrementalLogicDF.select($"df1.id".as("hist.id"), $"df2.id".as("del.id"), $"md5Flag").show()
+
+ val result_delta_DF = incrementalLogicDF
+      .select($"df2.*",$"md5Flag")
+      .filter($"md5Flag" === "I" || $"md5Flag" === "U")
+      //.withColumn("eff_start_date", current_timestamp())
+      //.withColumn("eff_end_date",lit("9999-01-01 00:00:00"))
+      //.withColumn("curr_ind", lit("Y"))
+      //.withColumn("md5_chk_sum",lit("MD1"))
+      .drop("md5Flag")
+      
+ result_delta_DF.orderBy($"id").show(false)
+
